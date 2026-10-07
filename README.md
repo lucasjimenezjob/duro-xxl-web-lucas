@@ -47,7 +47,7 @@ La banda permite volver a la hora real. Las tres vistas usan hashes (`#inicio`, 
 
 ## GitHub y Vercel
 
-El proyecto está preparado para subir el código a tu repositorio de GitHub. Incluye `pnpm-lock.yaml`, `.gitignore` y `vercel.json`. No se ha creado un repositorio remoto ni se ha publicado la app.
+El código está en [lucasjimenezjob/duro-xxl-web-lucas](https://github.com/lucasjimenezjob/duro-xxl-web-lucas), conectado a la rama `main` de esta carpeta. Incluye `pnpm-lock.yaml`, `.gitignore` y `vercel.json`. La app todavía está pendiente de publicar en Vercel.
 
 Al importar el repositorio en Vercel:
 
