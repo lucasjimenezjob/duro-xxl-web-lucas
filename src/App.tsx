@@ -14,7 +14,13 @@ import {
   Star,
   TriangleAlert,
 } from "lucide-react";
-import { days, performances, specialEvents, stages } from "./data/festival";
+import {
+  days,
+  favoriteArtists,
+  performances,
+  specialEvents,
+  stages,
+} from "./data/festival";
 import type { Day, Performance, SpecialEvent, StageId } from "./data/festival";
 import {
   activeDay,
@@ -140,6 +146,12 @@ function Progress({ set, now }: { set: Performance; now: number }) {
   );
 }
 
+function ArtistAnnotation({ set }: { set: Performance }) {
+  return set.annotation ? (
+    <span className="artist-annotation">{set.annotation}</span>
+  ) : null;
+}
+
 function LiveCard({
   stage,
   now,
@@ -167,6 +179,7 @@ function LiveCard({
       {current ? (
         <>
           <h3>{current.artist}</h3>
+          <ArtistAnnotation set={current} />
           <p className="set-time">
             {timeLabel(current.start)} <span>—</span> {timeLabel(current.end)}
           </p>
@@ -187,6 +200,7 @@ function LiveCard({
               <button onClick={() => onOpen(next)}>
                 <span>Próximo · {timeLabel(next.start)}</span>
                 <strong>{next.artist}</strong>
+                <ArtistAnnotation set={next} />
               </button>
             ) : (
               <span>Programación finalizada</span>
@@ -381,7 +395,7 @@ function HomeView({
             className="outline-button"
             onClick={() => navigate("favoritos")}
           >
-            NUESTROS 13 FAVORITOS <Star size={16} />
+            NUESTROS {favoriteArtists.length} FAVORITOS <Star size={16} />
           </button>
         </section>
       ) : (
@@ -432,7 +446,14 @@ function HomeView({
                   >
                     <time>{timeLabel(set.start)}</time>
                     <strong>
-                      {set.artist}
+                      {set.annotation ? (
+                        <span className="upcoming-artist">
+                          {set.artist}
+                          <ArtistAnnotation set={set} />
+                        </span>
+                      ) : (
+                        set.artist
+                      )}
                       {set.favorite && <Star size={14} fill="currentColor" />}
                     </strong>
                     <span className="upcoming-stage">
@@ -531,6 +552,7 @@ function ScheduleCard({
             </span>
           )}
         </div>
+        <ArtistAnnotation set={set} />
         {status === "live" && (
           <div className="schedule-progress">
             <Progress set={set} now={now} />
@@ -575,7 +597,7 @@ function FavoritesView({
         <h1>
           NUESTROS <span>FAVORITOS.</span>
         </h1>
-        <p>13 artistas. Nuestra ruta por DURO XXL.</p>
+        <p>{favoriteArtists.length} artistas. Nuestra ruta por DURO XXL.</p>
       </div>
       <DayTabs day={day} setDay={setDay} />
       <div className="list-heading">

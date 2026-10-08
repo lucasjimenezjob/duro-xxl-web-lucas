@@ -22,9 +22,9 @@ import {
   timeLabel,
 } from "../src/lib/time.ts";
 
-test("el dataset contiene las 55 actuaciones y exactamente los 13 favoritos", () => {
+test("el dataset contiene las 55 actuaciones y exactamente los 17 favoritos", () => {
   assert.equal(performances.length, 55);
-  assert.equal(performances.filter((set) => set.favorite).length, 13);
+  assert.equal(performances.filter((set) => set.favorite).length, 17);
   assert.deepEqual(
     new Set(
       performances.filter((set) => set.favorite).map((set) => set.artist),
@@ -91,6 +91,50 @@ test("el siguiente favorito excluye los actuales y conserva los empates", () => 
     ["VIEZE ASBAK", "ROOLER"],
   );
   assert.deepEqual(nextFavorites(festivalEnd), []);
+});
+
+test("los cuatro nuevos favoritos se incluyen en la agenda y próximos sin nuevos solapes", () => {
+  const additions = [
+    "JAZZY",
+    "KRUELTY",
+    "TOXIC MACHINERY",
+    "DJ SISU b2b XAVISTYLE",
+  ];
+  for (const artist of additions) {
+    const set = performances.find((set) => set.artist === artist)!;
+    assert.equal(set.favorite, true);
+    assert.deepEqual(conflictsFor(set), []);
+  }
+  for (const [day, time, expected] of [
+    ["saturday", "14:00", "KRUELTY"],
+    ["saturday", "15:30", "TOXIC MACHINERY"],
+    ["saturday", "21:30", "DJ SISU b2b XAVISTYLE"],
+    ["sunday", "18:00", "JAZZY"],
+  ] as const) {
+    assert.deepEqual(
+      nextFavorites(at(day, time)).map((set) => set.artist),
+      [expected],
+    );
+  }
+});
+
+test("la etiqueta de Andrés Campo no lo incluye en favoritos, próximos ni solapes", () => {
+  const set = performances.find(
+    (set) => set.artist === "ANDRÉS CAMPO b2b FUTURE.666",
+  )!;
+  assert.equal(set.annotation, "A escucharlo al Bershka🎀");
+  assert.equal(set.favorite, false);
+  assert.deepEqual(conflictsFor(set), []);
+  assert.deepEqual(
+    nextFavorites(at("saturday", "17:15")).map((set) => set.artist),
+    ["NOVAH"],
+  );
+  for (const favorite of performances.filter((set) => set.favorite)) {
+    assert.equal(
+      conflictsFor(favorite).some((other) => other.id === set.id),
+      false,
+    );
+  }
 });
 
 test("detecta solapes parciales entre favoritos, pero no horarios contiguos", () => {

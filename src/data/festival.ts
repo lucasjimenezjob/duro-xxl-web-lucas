@@ -8,6 +8,7 @@ export interface Performance {
   start: number;
   end: number;
   favorite: boolean;
+  annotation?: string;
 }
 
 export const TIME_ZONE = "Europe/Madrid";
@@ -66,7 +67,16 @@ export const favoriteArtists = [
   "ROOLER",
   "ANDEREX",
   "SO JUICE",
+  "JAZZY",
+  "KRUELTY",
+  "TOXIC MACHINERY",
+  "DJ SISU b2b XAVISTYLE",
 ] as const;
+
+// Una etiqueta de la actuación, independiente de la lista de favoritos.
+const artistAnnotations: Record<string, string> = {
+  "ANDRÉS CAMPO b2b FUTURE.666": "A escucharlo al Bershka🎀",
+};
 
 // Las fechas del festival están en CEST (UTC+02:00). El offset explícito evita
 // interpretar los horarios con la zona del teléfono o del servidor de Vercel.
@@ -160,6 +170,7 @@ export const performances: Performance[] = (Object.keys(schedule) as Day[])
         start: at(day, start),
         end: at(day, end),
         favorite: favoriteArtists.some((name) => name === artist),
+        annotation: artistAnnotations[artist],
       })),
     ),
   )

@@ -812,6 +812,35 @@ svg {
 .favorite-star {
   color: var(--lime);
 }
+.artist-annotation {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid #725066;
+  border-radius: 4px;
+  background: #291b27;
+  color: #edbad9;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.schedule-body > .artist-annotation {
+  margin-top: 10px;
+}
+.live-card > .artist-annotation {
+  margin-bottom: 10px;
+}
+.upcoming-artist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
 .schedule-meta {
   display: flex;
   align-items: center;
