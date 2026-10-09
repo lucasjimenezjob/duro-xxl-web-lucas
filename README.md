@@ -31,6 +31,8 @@ La versión 0.2.0 añade JAZZY, KRUELTY, TOXIC MACHINERY y DJ SISU b2b XAVISTYLE
 
 La versión 0.3.0 añade YANAMASTE, LEE ANN ROBERTS, CERA KHIN y ALARICO. Los próximos favoritos, los destacados y las duraciones de sus solapes se calculan con la misma lógica existente.
 
+La versión 0.4.0 añade un easter egg: tres toques en la tarjeta de PYRO SHOW en menos de 1,2 segundos abren una secuencia de 7,8 segundos con el logo aportado, fuegos artificiales y sonido sintetizado en el dispositivo. Funciona tanto en Lineup del domingo como en el aviso de Inicio. Se puede silenciar o cerrar; Escape también cierra el espectáculo. Al terminar, cerrar o cambiar de pestaña se detienen la animación y el audio. Respeta la preferencia de movimiento reducido con una escena estática. También admite tres pulsaciones de Enter o espacio sobre la tarjeta enfocada. Los horarios y el resto de vistas conservan su comportamiento.
+
 Los botones de próximas actuaciones abren el día y escenario correspondientes en Lineup y destacan la actuación.
 
 ## Datos y reloj
@@ -73,9 +75,12 @@ La aplicación es personal y tiene `noindex`, pero no incluye autenticación: qu
 src/
   App.tsx             Vistas, navegación y reloj
   styles.css          Diseño responsive y accesibilidad
+  components/         Easter egg del Pyro Show y sus estilos aislados
   data/festival.ts    Horario, escenarios, favoritos y evento especial
   lib/time.ts         Estados, progreso, próximos y conflictos
+  lib/pyro.ts         Triple toque, animación en canvas y sonido Web Audio
 tests/time.test.ts    Pruebas de datos y límites horarios
+tests/pyro.test.ts    Activación y reinicio de la secuencia de toques
 public/images/        Fondo del festival
 ```
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { usePyroEasterEgg } from "./components/PyroEasterEgg";
 import {
   Activity,
   ArrowUpRight,
@@ -275,8 +276,28 @@ function SpecialEventCard({
   event: SpecialEvent;
   now?: number;
 }) {
+  const tap = usePyroEasterEgg();
+  const isPyro = event.id === "pyro-show";
   return (
-    <div className="special-event">
+    <div
+      className="special-event"
+      role={isPyro ? "button" : undefined}
+      tabIndex={isPyro ? 0 : undefined}
+      onClick={isPyro ? tap : undefined}
+      onKeyDown={
+        isPyro
+          ? (event) => {
+              if (
+                !event.repeat &&
+                (event.key === "Enter" || event.key === " ")
+              ) {
+                event.preventDefault();
+                tap();
+              }
+            }
+          : undefined
+      }
+    >
       <Flame size={24} />
       <div>
         <span className="eyebrow">

@@ -1,0 +1,198 @@
+.special-event[role="button"] {
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+.special-event[role="button"]:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 4px;
+}
+.pyro-show {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  color: #fff;
+  background: #030504;
+  isolation: isolate;
+  animation: pyro-enter 450ms ease-out both;
+}
+.pyro-show::backdrop {
+  background: #030504;
+}
+.pyro-atmosphere {
+  position: absolute;
+  inset: 0;
+  opacity: 0.6;
+  background:
+    radial-gradient(ellipse at 50% 48%, #293619 0%, transparent 55%),
+    radial-gradient(ellipse at 15% 80%, #06313a 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 20%, #271633 0%, transparent 45%);
+}
+.pyro-fireworks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.pyro-logo-scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 3vh, 28px);
+  padding: 70px 20px;
+  pointer-events: none;
+  animation: pyro-reveal 7.8s ease-in-out both;
+}
+.pyro-logo {
+  position: relative;
+  width: min(92vw, 960px);
+  height: auto;
+  max-height: 48dvh;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 18px #d4f44855) drop-shadow(0 0 60px #d4f44822);
+}
+.pyro-kicker,
+.pyro-tagline {
+  position: relative;
+  text-align: center;
+}
+.pyro-kicker {
+  font-size: clamp(9px, 2.5vw, 12px);
+  color: #d4f448;
+  letter-spacing: 0.25em;
+}
+.pyro-tagline {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: clamp(24px, 5vw, 46px);
+  letter-spacing: 0.1em;
+}
+.pyro-orbit {
+  position: absolute;
+  width: min(76vw, 680px);
+  aspect-ratio: 1;
+  border: 1px solid #d4f44828;
+  border-radius: 50%;
+  box-shadow:
+    0 0 90px #d4f44808,
+    inset 0 0 70px #d4f44808;
+  animation: pyro-orbit 7.8s ease-out both;
+}
+.pyro-controls {
+  position: absolute;
+  z-index: 2;
+  top: max(18px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  display: flex;
+  gap: 10px;
+}
+.pyro-controls button {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  color: #f1f2ee;
+  border: 1px solid #ffffff40;
+  background: #111811d9;
+  border-radius: 50%;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.pyro-controls button:focus-visible {
+  outline: 2px solid #d4f448;
+  outline-offset: 3px;
+}
+.pyro-duration {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #ffffff10;
+}
+.pyro-duration span {
+  display: block;
+  height: 100%;
+  background: #d4f448;
+  transform-origin: left;
+  animation: pyro-time 7.8s linear both;
+}
+@keyframes pyro-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pyro-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.75) translateY(18px);
+  }
+  14% {
+    opacity: 1;
+    transform: scale(1.02) translateY(0);
+  }
+  24% {
+    transform: scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: scale(1.035);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.07);
+  }
+}
+@keyframes pyro-orbit {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  25% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+@keyframes pyro-time {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pyro-show,
+  .pyro-logo-scene,
+  .pyro-orbit,
+  .pyro-duration span {
+    animation: none;
+  }
+  .pyro-orbit {
+    opacity: 0.4;
+  }
+}
+@media print {
+  .pyro-show {
+    display: none;
+  }
+}
