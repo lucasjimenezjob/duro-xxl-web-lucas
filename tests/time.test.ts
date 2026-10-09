@@ -22,9 +22,9 @@ import {
   timeLabel,
 } from "../src/lib/time.ts";
 
-test("el dataset contiene las 55 actuaciones y exactamente los 17 favoritos", () => {
+test("el dataset contiene las 55 actuaciones y exactamente los 21 favoritos", () => {
   assert.equal(performances.length, 55);
-  assert.equal(performances.filter((set) => set.favorite).length, 17);
+  assert.equal(performances.filter((set) => set.favorite).length, 21);
   assert.deepEqual(
     new Set(
       performances.filter((set) => set.favorite).map((set) => set.artist),
@@ -84,7 +84,7 @@ test("a las 19:00 TITI sustituye a Karah sin refrescar ni solapar actuaciones", 
 test("el siguiente favorito excluye los actuales y conserva los empates", () => {
   assert.deepEqual(
     nextFavorites(at("saturday", "18:47")).map((set) => set.artist),
-    ["SANTØS"],
+    ["LEE ANN ROBERTS"],
   );
   assert.deepEqual(
     nextFavorites(at("sunday", "17:00")).map((set) => set.artist),
@@ -93,7 +93,7 @@ test("el siguiente favorito excluye los actuales y conserva los empates", () => 
   assert.deepEqual(nextFavorites(festivalEnd), []);
 });
 
-test("los cuatro nuevos favoritos se incluyen en la agenda y próximos sin nuevos solapes", () => {
+test("los favoritos añadidos en 0.2.0 siguen en la agenda y próximos", () => {
   const additions = [
     "JAZZY",
     "KRUELTY",
@@ -103,7 +103,6 @@ test("los cuatro nuevos favoritos se incluyen en la agenda y próximos sin nuevo
   for (const artist of additions) {
     const set = performances.find((set) => set.artist === artist)!;
     assert.equal(set.favorite, true);
-    assert.deepEqual(conflictsFor(set), []);
   }
   for (const [day, time, expected] of [
     ["saturday", "14:00", "KRUELTY"],
@@ -116,6 +115,46 @@ test("los cuatro nuevos favoritos se incluyen en la agenda y próximos sin nuevo
       [expected],
     );
   }
+});
+
+test("los favoritos de 0.3.0 incluyen todos sus solapes con duración exacta", () => {
+  const expected = [
+    [
+      "YANAMASTE",
+      [
+        ["KRUELTY", 30],
+        ["TOXIC MACHINERY", 60],
+        ["SLVL", 30],
+      ],
+    ],
+    ["LEE ANN ROBERTS", [["KLANGKUENSTLER", 90]]],
+    ["CERA KHIN", [["SANTØS", 60]]],
+    ["ALARICO", [["KOBOSIL", 90]]],
+  ] as const;
+  for (const [artist, overlaps] of expected) {
+    const set = performances.find((set) => set.artist === artist)!;
+    assert.equal(set.favorite, true);
+    assert.deepEqual(
+      conflictsFor(set).map((other) => [
+        other.artist,
+        overlapDuration(set, other) / 60_000,
+      ]),
+      overlaps,
+    );
+    for (const [otherArtist, minutes] of overlaps) {
+      const other = performances.find((set) => set.artist === otherArtist)!;
+      assert.ok(conflictsFor(other).some((conflict) => conflict.id === set.id));
+      assert.equal(overlapDuration(other, set), minutes * 60_000);
+    }
+  }
+  assert.deepEqual(
+    nextFavorites(at("saturday", "15:05")).map((set) => set.artist),
+    ["YANAMASTE"],
+  );
+  assert.deepEqual(
+    nextFavorites(at("sunday", "14:50")).map((set) => set.artist),
+    ["KOBOSIL", "ALARICO"],
+  );
 });
 
 test("la etiqueta de Andrés Campo no lo incluye en favoritos, próximos ni solapes", () => {

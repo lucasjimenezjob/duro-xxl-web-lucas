@@ -71,6 +71,10 @@ export const favoriteArtists = [
   "KRUELTY",
   "TOXIC MACHINERY",
   "DJ SISU b2b XAVISTYLE",
+  "YANAMASTE",
+  "LEE ANN ROBERTS",
+  "CERA KHIN",
+  "ALARICO",
 ] as const;
 
 // Una etiqueta de la actuación, independiente de la lista de favoritos.

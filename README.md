@@ -23,11 +23,13 @@ pnpm preview
 ## Las tres vistas
 
 - **Inicio:** cuenta atrás antes del festival; actuaciones actuales, barras de tiempo transcurrido y minutos restantes durante el directo; siguientes actuaciones y próximo favorito. Contempla la pausa entre jornadas y el final del festival.
-- **Favoritos:** los 17 favoritos precargados, separados por día, con estado temporal y todos los solapes entre escenarios, incluidos los parciales. Cada coincidencia indica la duración del tramo compartido. No hay selección manual.
+- **Favoritos:** los 21 favoritos precargados, separados por día, con estado temporal y todos los solapes entre escenarios, incluidos los parciales. Cada coincidencia indica la duración del tramo compartido. No hay selección manual.
 
 - **Lineup:** las 55 actuaciones, separadas por día y escenario, con filtro de escenario y favoritos identificados. El domingo, Black Hangar se identifica también como Laster.
 
 La versión 0.2.0 añade JAZZY, KRUELTY, TOXIC MACHINERY y DJ SISU b2b XAVISTYLE. ANDRÉS CAMPO b2b FUTURE.666 conserva su actuación con la etiqueta «A escucharlo al Bershka🎀»: no es favorito, no aparece en la agenda de favoritos ni en sus solapes y no crea una categoría nueva.
+
+La versión 0.3.0 añade YANAMASTE, LEE ANN ROBERTS, CERA KHIN y ALARICO. Los próximos favoritos, los destacados y las duraciones de sus solapes se calculan con la misma lógica existente.
 
 Los botones de próximas actuaciones abren el día y escenario correspondientes en Lineup y destacan la actuación.
 
