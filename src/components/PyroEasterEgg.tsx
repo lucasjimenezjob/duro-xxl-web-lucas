@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
-import { Volume2, VolumeX, X } from "lucide-react";
+import { X } from "lucide-react";
 import {
   createPyroAudio,
   PYRO_DURATION,
@@ -57,7 +57,7 @@ export function PyroEasterEggProvider({ children }: { children: ReactNode }) {
 function PyroShow({ audio, close }: { audio: PyroAudio; close: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const [muted, setMuted] = useState(false);
+  const impact = useRef<HTMLDivElement>(null);
   const [reduced] = useState(
     () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
@@ -67,7 +67,23 @@ function PyroShow({ audio, close }: { audio: PyroAudio; close: () => void }) {
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     element.showModal();
-    const stop = runFireworks(canvas.current!, audio, reduced);
+    let kick: Animation | undefined;
+    const stop = runFireworks(canvas.current!, audio, reduced, (power) => {
+      kick?.cancel();
+      kick = impact.current?.animate(
+        [
+          { transform: "scale(1) rotate(0deg)" },
+          {
+            transform: `scale(${1 + 0.1 * power}) rotate(-2deg)`,
+            offset: 0.14,
+          },
+          { transform: "scale(0.96) rotate(1.5deg)", offset: 0.38 },
+          { transform: "scale(1.025) rotate(-0.5deg)", offset: 0.65 },
+          { transform: "scale(1) rotate(0deg)" },
+        ],
+        { duration: 540, easing: "cubic-bezier(.16,1,.3,1)" },
+      );
+    });
     const timeout = window.setTimeout(close, PYRO_DURATION);
     const hidden = () => {
       if (document.hidden) close();
@@ -75,6 +91,7 @@ function PyroShow({ audio, close }: { audio: PyroAudio; close: () => void }) {
     document.addEventListener("visibilitychange", hidden);
     return () => {
       stop();
+      kick?.cancel();
       window.clearTimeout(timeout);
       document.removeEventListener("visibilitychange", hidden);
       element.close();
@@ -96,32 +113,17 @@ function PyroShow({ audio, close }: { audio: PyroAudio; close: () => void }) {
       <canvas ref={canvas} className="pyro-fireworks" aria-hidden="true" />
       <div className="pyro-logo-scene">
         <div className="pyro-orbit" aria-hidden="true" />
-        <span className="pyro-kicker">EASTER EGG DESBLOQUEADO</span>
-        <img
-          src="/images/duro-xxl-pyro.png"
-          width="1774"
-          height="887"
-          alt="DURO XXL"
-          className="pyro-logo"
-        />
-        <span className="pyro-tagline">QUE ARDA LA PISTA.</span>
+        <div ref={impact} className="pyro-logo-impact">
+          <img
+            src="/images/duro-xxl-pyro.png"
+            width="1774"
+            height="887"
+            alt="DURO XXL"
+            className="pyro-logo"
+          />
+        </div>
       </div>
       <div className="pyro-controls">
-        {audio && (
-          <button
-            type="button"
-            aria-label={
-              muted ? "Activar sonido" : "Silenciar fuegos artificiales"
-            }
-            aria-pressed={muted}
-            onClick={() => {
-              audio.mute(!muted);
-              setMuted(!muted);
-            }}
-          >
-            {muted ? <VolumeX size={21} /> : <Volume2 size={21} />}
-          </button>
-        )}
         <button
           type="button"
           aria-label="Cerrar fuegos artificiales"

@@ -50,35 +50,26 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(12px, 3vh, 28px);
   padding: 70px 20px;
+  perspective: 900px;
   pointer-events: none;
   animation: pyro-reveal 7.8s ease-in-out both;
 }
+.pyro-logo-impact {
+  position: relative;
+  will-change: transform;
+}
 .pyro-logo {
   position: relative;
-  width: min(92vw, 960px);
+  display: block;
+  width: min(78vw, 1000px);
   height: auto;
   max-height: 48dvh;
   object-fit: contain;
   mix-blend-mode: screen;
-  filter: drop-shadow(0 0 18px #d4f44855) drop-shadow(0 0 60px #d4f44822);
-}
-.pyro-kicker,
-.pyro-tagline {
-  position: relative;
-  text-align: center;
-}
-.pyro-kicker {
-  font-size: clamp(9px, 2.5vw, 12px);
-  color: #d4f448;
-  letter-spacing: 0.25em;
-}
-.pyro-tagline {
-  font-family: var(--heading);
-  font-weight: 700;
-  font-size: clamp(24px, 5vw, 46px);
-  letter-spacing: 0.1em;
+  filter: drop-shadow(0 0 22px #d4f44899) drop-shadow(0 0 75px #00d7ed40);
+  animation: pyro-logo-motion 7.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform;
 }
 .pyro-orbit {
   position: absolute;
@@ -141,22 +132,44 @@
 @keyframes pyro-reveal {
   0% {
     opacity: 0;
-    transform: scale(0.75) translateY(18px);
   }
-  14% {
+  8% {
     opacity: 1;
-    transform: scale(1.02) translateY(0);
   }
-  24% {
-    transform: scale(1);
-  }
-  85% {
+  88% {
     opacity: 1;
-    transform: scale(1.035);
   }
   100% {
     opacity: 0;
-    transform: scale(1.07);
+  }
+}
+@keyframes pyro-logo-motion {
+  0% {
+    transform: scale(0.22) rotate(-16deg) rotateY(-35deg);
+  }
+  9% {
+    transform: scale(1.08) rotate(3deg) rotateY(10deg);
+  }
+  18% {
+    transform: scale(0.96) rotate(-2deg) rotateY(-7deg);
+  }
+  30% {
+    transform: scale(1.03) rotate(1deg) rotateY(6deg) translateY(-8px);
+  }
+  43% {
+    transform: scale(0.97) rotate(-1.5deg) rotateY(-6deg) translateY(6px);
+  }
+  58% {
+    transform: scale(1.05) rotate(2deg) rotateY(8deg) translateY(-7px);
+  }
+  72% {
+    transform: scale(0.99) rotate(-2deg) rotateY(-5deg);
+  }
+  86% {
+    transform: scale(1.05) rotate(1deg) rotateY(4deg);
+  }
+  100% {
+    transform: scale(1.18) rotate(0deg) rotateY(0deg);
   }
 }
 @keyframes pyro-orbit {
@@ -183,9 +196,14 @@
 @media (prefers-reduced-motion: reduce) {
   .pyro-show,
   .pyro-logo-scene,
+  .pyro-logo,
   .pyro-orbit,
   .pyro-duration span {
     animation: none;
+  }
+  .pyro-logo-impact,
+  .pyro-logo {
+    will-change: auto;
   }
   .pyro-orbit {
     opacity: 0.4;

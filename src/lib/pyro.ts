@@ -32,8 +32,13 @@ export function createPyroAudio() {
     void context.resume().catch(() => {});
     const ctx = context;
     const master = ctx.createGain();
-    master.gain.value = 0.32;
+    master.gain.value = 0.68;
     const compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.value = -12;
+    compressor.knee.value = 10;
+    compressor.ratio.value = 8;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.22;
     master.connect(compressor);
     compressor.connect(ctx.destination);
     const noise = ctx.createBuffer(1, ctx.sampleRate * 1.4, ctx.sampleRate);
@@ -67,9 +72,9 @@ export function createPyroAudio() {
       const bass = ctx.createOscillator();
       const bassGain = ctx.createGain();
       bass.frequency.setValueAtTime(105, time);
-      bass.frequency.exponentialRampToValueAtTime(30, time + 0.7);
+      bass.frequency.exponentialRampToValueAtTime(38, time + 0.9);
       bassGain.gain.setValueAtTime(0.001, time);
-      bassGain.gain.linearRampToValueAtTime(0.55 * power, time + 0.015);
+      bassGain.gain.linearRampToValueAtTime(0.85 * power, time + 0.008);
       bassGain.gain.exponentialRampToValueAtTime(0.001, time + 1.1);
       bass.connect(bassGain);
       bassGain.connect(master);
@@ -88,7 +93,7 @@ export function createPyroAudio() {
       filter.frequency.setValueAtTime(5200, time);
       filter.frequency.exponentialRampToValueAtTime(650, time + 1.2);
       gain.gain.setValueAtTime(0.001, time);
-      gain.gain.linearRampToValueAtTime(0.48 * power, time + 0.01);
+      gain.gain.linearRampToValueAtTime(0.75 * power, time + 0.006);
       gain.gain.exponentialRampToValueAtTime(0.001, time + 1.3);
       burst.connect(filter);
       filter.connect(gain);
@@ -100,14 +105,45 @@ export function createPyroAudio() {
         filter.disconnect();
         gain.disconnect();
       };
+      // A second low body and a delayed rumble give the explosion weight.
+      const body = ctx.createOscillator();
+      const bodyGain = ctx.createGain();
+      body.type = "triangle";
+      body.frequency.setValueAtTime(150, time);
+      body.frequency.exponentialRampToValueAtTime(48, time + 0.28);
+      bodyGain.gain.setValueAtTime(0.42 * power, time);
+      bodyGain.gain.exponentialRampToValueAtTime(0.001, time + 0.45);
+      body.connect(bodyGain);
+      bodyGain.connect(master);
+      body.start(time);
+      body.stop(time + 0.48);
+      body.onended = () => {
+        body.disconnect();
+        bodyGain.disconnect();
+      };
+      const echo = ctx.createBufferSource();
+      const echoFilter = ctx.createBiquadFilter();
+      const echoGain = ctx.createGain();
+      echo.buffer = noise;
+      echoFilter.type = "lowpass";
+      echoFilter.frequency.value = 420;
+      echoGain.gain.setValueAtTime(0.001, time);
+      echoGain.gain.linearRampToValueAtTime(0.36 * power, time + 0.13);
+      echoGain.gain.exponentialRampToValueAtTime(0.001, time + 1.45);
+      echo.connect(echoFilter);
+      echoFilter.connect(echoGain);
+      echoGain.connect(master);
+      echo.start(time + 0.08);
+      echo.stop(time + 1.48);
+      echo.onended = () => {
+        echo.disconnect();
+        echoFilter.disconnect();
+        echoGain.disconnect();
+      };
     }
     return {
       whistle,
       boom,
-      mute(value: boolean) {
-        if (ctx.state === "closed") return;
-        master.gain.setTargetAtTime(value ? 0 : 0.32, ctx.currentTime, 0.03);
-      },
       stop() {
         if (ctx.state !== "closed") void ctx.close().catch(() => {});
       },
@@ -137,12 +173,14 @@ interface Rocket {
   target: number;
   born: number;
   color: string;
+  power: number;
 }
 
 export function runFireworks(
   canvas: HTMLCanvasElement,
   audio: PyroAudio,
   reduced: boolean,
+  onImpact?: (power: number) => void,
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return () => {};
@@ -152,6 +190,13 @@ export function runFireworks(
   const colors = ["#d4f448", "#fbd89a", "#00d7ed", "#c078ff", "#fff4da"];
   const sparks: Spark[] = [];
   const rockets: Rocket[] = [];
+  const waves: {
+    x: number;
+    y: number;
+    age: number;
+    color: string;
+    power: number;
+  }[] = [];
   const resize = () => {
     width = window.innerWidth;
     height = window.innerHeight;
@@ -167,22 +212,34 @@ export function runFireworks(
     nextLaunch = 150,
     launches = 0;
   const burst = (rocket: Rocket) => {
-    audio?.boom(launches > 7 ? 1 : 0.8);
-    const count = width < 600 ? 72 : 110;
+    audio?.boom(rocket.power);
+    onImpact?.(rocket.power);
+    waves.push({
+      x: rocket.x,
+      y: rocket.target,
+      age: 0,
+      color: rocket.color,
+      power: rocket.power,
+    });
+    const count = width < 600 ? 125 : 175;
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2;
-      const speed = (45 + Math.random() * 115) * (width < 600 ? 0.85 : 1.3);
+      const speed =
+        (70 + Math.random() * 180) * rocket.power * (width < 600 ? 0.85 : 1.25);
       sparks.push({
         x: rocket.x,
         y: rocket.target,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         age: 0,
-        life: 1.3 + Math.random() * 1.1,
+        life: 1.6 + Math.random() * 1.1,
         color: rocket.color,
-        size: Math.random() > 0.85 ? 2.4 : 1.4,
+        size: Math.random() > 0.8 ? 3 : 1.8,
       });
     }
+    // Keep the finale bounded on phones even when several shells coincide.
+    const limit = width < 600 ? 1800 : 2800;
+    if (sparks.length > limit) sparks.splice(0, sparks.length - limit);
   };
   if (reduced) {
     // A still starfield and logo for people who request less motion.
@@ -200,29 +257,36 @@ export function runFireworks(
       previous = now;
       ctx.clearRect(0, 0, width, height);
       if (elapsed >= nextLaunch && elapsed < 5700) {
-        const color = colors[launches % colors.length];
-        rockets.push({
-          x: width * (0.12 + Math.random() * 0.76),
-          y: height + 15,
-          target: height * (0.12 + Math.random() * 0.46),
-          born: elapsed,
-          color,
-        });
+        const finale = elapsed > 4000;
+        const shells = finale ? 3 : 2;
+        for (let shell = 0; shell < shells; shell++) {
+          rockets.push({
+            x: width * ((shell + 0.4 + Math.random() * 0.2) / shells),
+            y: height + 15,
+            target: height * (0.16 + Math.random() * 0.57),
+            born: elapsed + shell * 90,
+            color: colors[(launches + shell) % colors.length],
+            power: finale ? 1.25 : 1,
+          });
+        }
         audio?.whistle();
         launches++;
-        nextLaunch = elapsed + (elapsed > 4100 ? 180 : 530);
+        nextLaunch = elapsed + (finale ? 420 : 620);
       }
       ctx.lineCap = "round";
       for (let i = rockets.length - 1; i >= 0; i--) {
         const rocket = rockets[i];
-        const progress = Math.min((elapsed - rocket.born) / 650, 1);
+        const progress = Math.max(
+          0,
+          Math.min((elapsed - rocket.born) / 540, 1),
+        );
         rocket.y =
           height +
           15 +
           (rocket.target - height - 15) * (1 - (1 - progress) ** 2);
         ctx.strokeStyle = rocket.color;
-        ctx.globalAlpha = 0.75;
-        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.95;
+        ctx.lineWidth = 2.8;
         ctx.beginPath();
         ctx.moveTo(rocket.x, rocket.y + 32);
         ctx.lineTo(rocket.x, rocket.y);
@@ -231,6 +295,33 @@ export function runFireworks(
           burst(rocket);
           rockets.splice(i, 1);
         }
+      }
+      for (let i = waves.length - 1; i >= 0; i--) {
+        const wave = waves[i];
+        wave.age += dt;
+        if (wave.age > 0.75) {
+          waves.splice(i, 1);
+          continue;
+        }
+        const radius = 12 + wave.age * 300 * wave.power;
+        ctx.globalAlpha = (1 - wave.age / 0.75) * 0.5;
+        ctx.strokeStyle = wave.color;
+        ctx.lineWidth = 2 * (1 - wave.age / 0.75);
+        ctx.beginPath();
+        ctx.arc(wave.x, wave.y, radius, 0, Math.PI * 2);
+        ctx.stroke();
+        const glow = ctx.createRadialGradient(
+          wave.x,
+          wave.y,
+          0,
+          wave.x,
+          wave.y,
+          radius,
+        );
+        glow.addColorStop(0, wave.color + "40");
+        glow.addColorStop(1, wave.color + "00");
+        ctx.fillStyle = glow;
+        ctx.fillRect(wave.x - radius, wave.y - radius, radius * 2, radius * 2);
       }
       for (let i = sparks.length - 1; i >= 0; i--) {
         const spark = sparks[i];
@@ -245,11 +336,11 @@ export function runFireworks(
         spark.vy += 46 * dt;
         spark.x += spark.vx * dt;
         spark.y += spark.vy * dt;
-        ctx.globalAlpha = (1 - spark.age / spark.life) ** 1.3;
+        ctx.globalAlpha = (1 - spark.age / spark.life) ** 0.8;
         ctx.strokeStyle = spark.color;
         ctx.lineWidth = spark.size;
         ctx.beginPath();
-        ctx.moveTo(x - spark.vx * 0.025, y - spark.vy * 0.025);
+        ctx.moveTo(x - spark.vx * 0.075, y - spark.vy * 0.075);
         ctx.lineTo(spark.x, spark.y);
         ctx.stroke();
         ctx.fillStyle = "#fff9de";
